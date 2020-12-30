@@ -414,6 +414,22 @@ class RoomController extends AEnvironmentAwareController {
 			'messageExpiration' => 0,
 		];
 
+		if ($this->getAPIVersion() >= 3) {
+			$roomData = array_merge($roomData, [
+				'sipEnabled' => Webinary::SIP_DISABLED,
+				'actorType' => '',
+				'actorId' => '',
+				'attendeeId' => 0,
+				'canEnableSIP' => false,
+				'attendeePin' => '',
+				'description' => '',
+				'avatarId' => '',
+				'avatarVersion' => 0,
+				'lastCommonReadMessage' => 0,
+				'listable' => Room::LISTABLE_NONE,
+			]);
+		}
+
 		$lastActivity = $room->getLastActivity();
 		if ($lastActivity instanceof \DateTimeInterface) {
 			$lastActivity = $lastActivity->getTimestamp();
@@ -476,6 +492,8 @@ class RoomController extends AEnvironmentAwareController {
 			'attendeePermissions' => $attendee->getPermissions(),
 			'callPermissions' => $room->getCallPermissions(),
 			'defaultPermissions' => $room->getDefaultPermissions(),
+			'avatarId' => $room->getAvatarId(),
+			'avatarVersion' => $room->getAvatarVersion(),
 			'description' => $room->getDescription(),
 			'listable' => $room->getListable(),
 			'messageExpiration' => $room->getMessageExpiration(),
