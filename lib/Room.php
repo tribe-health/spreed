@@ -27,6 +27,8 @@ declare(strict_types=1);
 
 namespace OCA\Talk;
 
+use OCA\Talk\Events\ModifyAvatarEvent;
+use OCA\Talk\Events\ModifyLobbyEvent;
 use OCA\Talk\Events\ModifyRoomEvent;
 use OCA\Talk\Events\RoomEvent;
 use OCA\Talk\Events\SignalingRoomPropertiesEvent;
@@ -105,6 +107,8 @@ class Room {
 	public const EVENT_AFTER_NAME_SET = self::class . '::postSetName';
 	public const EVENT_BEFORE_DESCRIPTION_SET = self::class . '::preSetDescription';
 	public const EVENT_AFTER_DESCRIPTION_SET = self::class . '::postSetDescription';
+	public const EVENT_BEFORE_AVATAR_SET = self::class . '::preSetAvatar';
+	public const EVENT_AFTER_AVATAR_SET = self::class . '::postSetAvatar';
 	public const EVENT_BEFORE_PASSWORD_SET = self::class . '::preSetPassword';
 	public const EVENT_AFTER_PASSWORD_SET = self::class . '::postSetPassword';
 	public const EVENT_BEFORE_TYPE_SET = self::class . '::preSetType';
@@ -378,10 +382,6 @@ class Room {
 		return $this->description;
 	}
 
-	public function setDescription(string $description): void {
-		$this->description = $description;
-	}
-
 	public function getAvatarId(): string {
 		return $this->avatarId;
 	}
@@ -451,10 +451,6 @@ class Room {
 
 	public function getPassword(): string {
 		return $this->password;
-	}
-
-	public function setPassword(string $password): void {
-		$this->password = $password;
 	}
 
 	public function getRemoteServer(): string {
@@ -719,6 +715,99 @@ class Room {
 		$this->name = $newName;
 
 		$this->dispatcher->dispatch(self::EVENT_AFTER_NAME_SET, $event);
+
+		return true;
+	}
+
+	/**
+	 * @param string $description
+	 * @return bool True when the change was valid, false otherwise
+	 * @throws \LengthException when the given description is too long
+	 */
+	public function setDescription(string $description): bool {
+		$description = trim($description);
+
+		if (mb_strlen($description) > self::DESCRIPTION_MAXIMUM_LENGTH) {
+			throw new \LengthException('Conversation description is limited to ' . self::DESCRIPTION_MAXIMUM_LENGTH . ' characters');
+		}
+
+		$oldDescription = $this->getDescription();
+		if ($description === $oldDescription) {
+			return false;
+		}
+
+		$event = new ModifyRoomEvent($this, 'description', $description, $oldDescription);
+		$this->dispatcher->dispatch(self::EVENT_BEFORE_DESCRIPTION_SET, $event);
+
+		$query = $this->db->getQueryBuilder();
+		$query->update('talk_rooms')
+			->set('description', $query->createNamedParameter($description))
+			->where($query->expr()->eq('id', $query->createNamedParameter($this->getId(), IQueryBuilder::PARAM_INT)));
+		$query->execute();
+		$this->description = $description;
+
+		$this->dispatcher->dispatch(self::EVENT_AFTER_DESCRIPTION_SET, $event);
+
+		return true;
+	}
+
+	/**
+	 * Sets the avatar id and version.
+	 *
+	 * @param string $avatarId
+	 * @param int $avatarVersion
+	 * @return bool True when the change was valid, false otherwise
+	 */
+	public function setAvatar(string $avatarId, int $avatarVersion): bool {
+		$oldAvatarId = $this->getAvatarId();
+		$oldAvatarVersion = $this->getAvatarVersion();
+		if ($avatarId === $oldAvatarId && $avatarVersion === $oldAvatarVersion) {
+			return false;
+		}
+
+		if ($avatarVersion <= $oldAvatarVersion) {
+			return false;
+		}
+
+		$event = new ModifyAvatarEvent($this, 'avatarId', $avatarId, $oldAvatarId, $avatarVersion);
+		$this->dispatcher->dispatch(self::EVENT_BEFORE_AVATAR_SET, $event);
+
+		$query = $this->db->getQueryBuilder();
+		$query->update('talk_rooms')
+			->set('avatar_id', $query->createNamedParameter($avatarId))
+			->set('avatar_version', $query->createNamedParameter($avatarVersion, IQueryBuilder::PARAM_INT))
+			->where($query->expr()->eq('id', $query->createNamedParameter($this->getId(), IQueryBuilder::PARAM_INT)));
+		$query->execute();
+		$this->avatarId = $avatarId;
+		$this->avatarVersion = $avatarVersion;
+
+		$this->dispatcher->dispatch(self::EVENT_AFTER_AVATAR_SET, $event);
+
+		return true;
+	}
+
+	/**
+	 * @param string $password Currently it is only allowed to have a password for Room::PUBLIC_CALL
+	 * @return bool True when the change was valid, false otherwise
+	 */
+	public function setPassword(string $password): bool {
+		if ($this->getType() !== self::PUBLIC_CALL) {
+			return false;
+		}
+
+		$hash = $password !== '' ? $this->hasher->hash($password) : '';
+
+		$event = new ModifyRoomEvent($this, 'password', $password);
+		$this->dispatcher->dispatch(self::EVENT_BEFORE_PASSWORD_SET, $event);
+
+		$query = $this->db->getQueryBuilder();
+		$query->update('talk_rooms')
+			->set('password', $query->createNamedParameter($hash))
+			->where($query->expr()->eq('id', $query->createNamedParameter($this->getId(), IQueryBuilder::PARAM_INT)));
+		$query->execute();
+		$this->password = $hash;
+
+		$this->dispatcher->dispatch(self::EVENT_AFTER_PASSWORD_SET, $event);
 
 		return true;
 	}
