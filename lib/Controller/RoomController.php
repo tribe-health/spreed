@@ -470,6 +470,12 @@ class RoomController extends AEnvironmentAwareController {
 			'messageExpiration' => $room->getMessageExpiration(),
 		]);
 
+		if ($room->getRemoteServer() && $room->getRemoteToken()) {
+			$roomData['remoteServer'] = $room->getRemoteServer();
+			$roomData['remoteToken'] = $room->getRemoteToken();
+			$roomData['remoteAccessToken'] = $attendee->getAccessToken();
+		}
+
 		if ($currentParticipant->getAttendee()->getReadPrivacy() === Participant::PRIVACY_PUBLIC) {
 			if (isset($this->commonReadMessages[$room->getId()])) {
 				$roomData['lastCommonReadMessage'] = $this->commonReadMessages[$room->getId()];
