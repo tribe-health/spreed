@@ -56,6 +56,8 @@ class FeatureContext implements Context, SnippetAcceptingContext {
 	protected static $remoteToInviteId;
 	/** @var string[] */
 	protected static $inviteIdToRemote;
+	/** @var string[] */
+	protected static $remoteAuth;
 	/** @var int[] */
 	protected static $questionToPollId;
 
@@ -286,6 +288,10 @@ class FeatureContext implements Context, SnippetAcceptingContext {
 	private function assertRooms($rooms, TableNode $formData) {
 		Assert::assertCount(count($formData->getHash()), $rooms, 'Room count does not match');
 		Assert::assertEquals($formData->getHash(), array_map(function ($room, $expectedRoom) {
+			if (isset($room['remoteAccessToken'])) {
+				self::$remoteAuth[self::translateRemoteServer($room['remoteServer']) . '#' . self::$identifierToToken[$room['name']]] = $room['remoteAccessToken'];
+			}
+
 			if (!isset(self::$identifierToToken[$room['name']])) {
 				self::$identifierToToken[$room['name']] = $room['token'];
 			}
@@ -563,6 +569,27 @@ class FeatureContext implements Context, SnippetAcceptingContext {
 		} else {
 			Assert::assertNull($formData);
 		}
+	}
+
+	/**
+	 * @Then /^user "([^"]*)" fetches remote room "([^"]*)" with (\d+) \((v4)\)$/
+	 */
+	public function userFetchesRemoteRoom(string $user, string $identifier, string $status, string $apiVersion): void {
+		if (!isset(self::$remoteAuth['LOCAL#' . self::$identifierToToken[$identifier]])) {
+			throw new \Exception(
+				'No remote auth available for: ' . 'LOCAL#' . self::$identifierToToken[$identifier]
+				. '. Did you pull rooms for the recipient?'
+			);
+		}
+		$accessToken = self::$remoteAuth['LOCAL#' . self::$identifierToToken[$identifier]];
+
+		$this->currentUser = 'federation#' . urlencode($user . '@' . 'http://localhost:8081') . '#' . $accessToken;
+		$this->sendRequest('GET', '/apps/spreed/api/' . $apiVersion . '/room/' . self::$identifierToToken[$identifier], null, [
+			'X-Nextcloud-Federation' => 'true',
+		]);
+
+		$this->assertStatusCode($this->response, $status);
+		var_dump($this->getDataFromResponse($this->response));
 	}
 
 	/**
@@ -2686,6 +2713,10 @@ class FeatureContext implements Context, SnippetAcceptingContext {
 		$options = ['cookies' => $this->getUserCookieJar($this->currentUser)];
 		if ($this->currentUser === 'admin') {
 			$options['auth'] = ['admin', 'admin'];
+		} elseif (strpos($this->currentUser, 'federation') === 0) {
+			$auth = explode('#', $this->currentUser);
+			array_shift($auth);
+			$options['auth'] = $auth;
 		} elseif (strpos($this->currentUser, 'guest') !== 0) {
 			$options['auth'] = [$this->currentUser, self::TEST_PASSWORD];
 		}
