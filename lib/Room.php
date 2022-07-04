@@ -456,6 +456,7 @@ class Room {
 	}
 
 	public function setParticipant(?string $userId, Participant $participant): void {
+		// FIXME Also used with cloudId, need actorType checking?
 		$this->currentUser = $userId;
 		$this->participant = $participant;
 	}
@@ -636,6 +637,9 @@ class Room {
 	 */
 	public function getParticipantByActor(string $actorType, string $actorId): Participant {
 		if ($actorType === Attendee::ACTOR_USERS) {
+			return $this->getParticipant($actorId, false);
+		}
+		if ($actorType === Attendee::ACTOR_FEDERATED_USERS) {
 			return $this->getParticipant($actorId, false);
 		}
 

@@ -692,6 +692,57 @@ class Manager {
 
 	/**
 	 * @param string $token
+	 * @param string $actorType
+	 * @param string $actorId
+	 * @param string $remoteAccess
+	 * @return Room
+	 * @throws RoomNotFoundException
+	 */
+	public function getRoomByRemoteAccess(string $token, string $actorType, string $actorId, string $remoteAccess): Room {
+		$query = $this->db->getQueryBuilder();
+		$helper = new SelectHelper();
+		$helper->selectRoomsTable($query);
+		$helper->selectAttendeesTable($query);
+		$query->from('talk_rooms', 'r')
+			->leftJoin('r', 'talk_attendees', 'a', $query->expr()->andX(
+				$query->expr()->eq('a.actor_type', $query->createNamedParameter($actorType)),
+				$query->expr()->eq('a.actor_id', $query->createNamedParameter($actorId)),
+				$query->expr()->eq('a.access_token', $query->createNamedParameter($remoteAccess)),
+				$query->expr()->eq('a.room_id', 'r.id')
+			))
+			->where($query->expr()->eq('r.token', $query->createNamedParameter($token)));
+
+//		if ($sessionId !== null) {
+//			$helper->selectSessionsTable($query);
+//			$query->leftJoin('a', 'talk_sessions', 's', $query->expr()->andX(
+//				$query->expr()->eq('s.session_id', $query->createNamedParameter($sessionId)),
+//				$query->expr()->eq('a.id', 's.attendee_id')
+//			));
+//		}
+
+		$result = $query->executeQuery();
+		$row = $result->fetch();
+		$result->closeCursor();
+
+		if ($row === false) {
+			throw new RoomNotFoundException();
+		}
+
+		if ($row['token'] === null) {
+			// FIXME Temporary solution for the Talk6 release
+			throw new RoomNotFoundException();
+		}
+
+		$room = $this->createRoomObject($row);
+		if ($actorType === Attendee::ACTOR_FEDERATED_USERS && isset($row['actor_id'])) {
+			$room->setParticipant($row['actor_id'], $this->createParticipantObject($room, $row));
+		}
+
+		return $room;
+	}
+
+	/**
+	 * @param string $token
 	 * @param string|null $preloadUserId Load this participant's information if possible
 	 * @return Room
 	 * @throws RoomNotFoundException

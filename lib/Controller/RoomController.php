@@ -275,17 +275,27 @@ class RoomController extends AEnvironmentAwareController {
 		$includeLastMessage = !$isSIPBridgeRequest;
 
 		try {
-			$sessionId = $this->session->getSessionForRoom($token);
-			$room = $this->manager->getRoomForUserByToken($token, $this->userId, $sessionId, $includeLastMessage, $isSIPBridgeRequest);
-
 			$participant = null;
-			try {
-				$participant = $room->getParticipant($this->userId, $sessionId);
-			} catch (ParticipantNotFoundException $e) {
+			$isTalkFederation = $this->request->getHeader('X-Nextcloud-Federation');
+
+			if (!$isTalkFederation) {
+				$sessionId = $this->session->getSessionForRoom($token);
+				$room = $this->manager->getRoomForUserByToken($token, $this->userId, $sessionId, $includeLastMessage, $isSIPBridgeRequest);
+
 				try {
-					$participant = $room->getParticipantBySession($sessionId);
+					$participant = $room->getParticipant($this->userId, $sessionId);
 				} catch (ParticipantNotFoundException $e) {
+					try {
+						$participant = $room->getParticipantBySession($sessionId);
+					} catch (ParticipantNotFoundException $e) {
+					}
 				}
+			} else {
+				$cloudId = urldecode($this->request->server['PHP_AUTH_USER']);
+				$accessToken = $this->request->server['PHP_AUTH_PW'];
+				$room = $this->manager->getRoomByRemoteAccess($token, Attendee::ACTOR_FEDERATED_USERS, $cloudId, $accessToken);
+				// FIXME continue on this
+				$participant = $room->getParticipantByActor(Attendee::ACTOR_FEDERATED_USERS, $cloudId);
 			}
 
 			return new DataResponse($this->formatRoom($room, $participant, [], $isSIPBridgeRequest), Http::STATUS_OK, $this->getTalkHashHeader());
