@@ -412,7 +412,7 @@ class RoomController extends AEnvironmentAwareController {
 			'listable' => Room::LISTABLE_NONE,
 			'callFlag' => Participant::FLAG_DISCONNECTED,
 			'messageExpiration' => 0,
-			'preHistory' => false,
+			'showHistory' => false,
 		];
 
 		$lastActivity = $room->getLastActivity();
@@ -480,7 +480,7 @@ class RoomController extends AEnvironmentAwareController {
 			'description' => $room->getDescription(),
 			'listable' => $room->getListable(),
 			'messageExpiration' => $room->getMessageExpiration(),
-			'preHistory' => $room->getPreHistory(),
+			'showHistory' => $room->getShowHistory(),
 		]);
 
 		if ($currentParticipant->getAttendee()->getReadPrivacy() === Participant::PRIVACY_PUBLIC) {
@@ -1753,8 +1753,8 @@ class RoomController extends AEnvironmentAwareController {
 	 * @PublicPage
 	 * @RequireModeratorParticipant
 	 */
-	public function setPreHistory(int $preHistory): DataResponse {
-		$this->roomService->setPreHistory($this->room, $preHistory);
+	public function setShowHistory(int $showHistory): DataResponse {
+		$this->roomService->setShowHistory($this->room, $showHistory);
 		return new DataResponse();
 	}
 }
