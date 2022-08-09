@@ -105,3 +105,4 @@ title: Capabilities
 * `config => call => enabled` - Whether calling is enabled on the instance or not
 * `config => signaling => session-ping-limit` - Number of sessions the HPB is allowed to ping in the same request
 * `config => signaling => hello-v2-token-key` - Public key to use when verifying JWT auth tokens for hello V2.
+* `limit-chat-history` - Limit chat history to timestamp of joining
