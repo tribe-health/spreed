@@ -52,6 +52,7 @@ class SelectHelper {
 			->addSelect($alias . 'object_id')
 			->addSelect($alias . 'listable')
 			->addSelect($alias . 'message_expiration')
+			->addSelect($alias . 'pre_history')
 			->addSelect($alias . 'remote_server')
 			->addSelect($alias . 'remote_token')
 			->selectAlias($alias . 'id', 'r_id');
@@ -76,6 +77,7 @@ class SelectHelper {
 			->addSelect($alias . 'last_mention_message')
 			->addSelect($alias . 'last_mention_direct')
 			->addSelect($alias . 'read_privacy')
+			->addSelect($alias . 'history_since')
 			->addSelect($alias . 'permissions')
 			->addSelect($alias . 'access_token')
 			->addSelect($alias . 'remote_id')
