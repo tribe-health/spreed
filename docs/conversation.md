@@ -364,7 +364,7 @@
 
 ## Toggle Pre history
 
-* Required capability: `limit-chat-history`
+* Required capability: `limit-show-history`
 * Method: `POST`
 * Endpoint: `/room/{token}/pre-history`
 * Data:
