@@ -552,10 +552,10 @@ class RoomService {
 		$this->dispatcher->dispatch(Room::EVENT_AFTER_SET_MESSAGE_EXPIRATION, $event);
 	}
 
-	public function setPreHistory(Room $room, bool $preHistory): void {
+	public function setPreHistory(Room $room, int $preHistory): void {
 		$update = $this->db->getQueryBuilder();
 		$update->update('talk_rooms')
-			->set('pre_history', $update->createNamedParameter($preHistory, IQueryBuilder::PARAM_BOOL));
+			->set('pre_history', $update->createNamedParameter($preHistory, IQueryBuilder::PARAM_INT));
 		$update->executeStatement();
 
 		$room->setPreHistory($preHistory);

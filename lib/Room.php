@@ -163,7 +163,7 @@ class Room {
 	private int $readOnly;
 	private int $listable;
 	private int $messageExpiration;
-	private bool $preHistory;
+	private int $preHistory;
 	private int $lobbyState;
 	private int $sipEnabled;
 	private ?int $assignedSignalingServer;
@@ -299,11 +299,11 @@ class Room {
 		$this->messageExpiration = $messageExpiration;
 	}
 
-	public function getPreHistory(): bool {
+	public function getPreHistory(): int {
 		return $this->preHistory;
 	}
 
-	public function setPreHistory(bool $preHistory): void {
+	public function setPreHistory(int $preHistory): void {
 		$this->preHistory = $preHistory;
 	}
 
