@@ -198,7 +198,7 @@ class Room {
 								int $readOnly,
 								int $listable,
 								int $messageExpiration,
-								bool $showHistory,
+								int $showHistory,
 								int $lobbyState,
 								int $sipEnabled,
 								?int $assignedSignalingServer,
