@@ -417,6 +417,8 @@ class ChatController extends AEnvironmentAwareController {
 			$comments = $this->chatManager->getHistory($this->room, $lastKnownMessageId, $limit, (bool) $includeLastKnown);
 		}
 
+		$comments = $this->filterHistorySince($comments, $attendee);
+
 		if (empty($comments)) {
 			$response = new DataResponse([], Http::STATUS_NOT_MODIFIED);
 			if ($lastCommonReadId && $this->participant->getAttendee()->getReadPrivacy() === Participant::PRIVACY_PUBLIC) {
@@ -431,8 +433,6 @@ class ChatController extends AEnvironmentAwareController {
 			}
 			return $response;
 		}
-
-		$comments = $this->filterHistorySince($comments, $attendee);
 
 		$i = 0;
 		$messages = $commentIdToIndex = $parentIds = [];
