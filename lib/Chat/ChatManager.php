@@ -716,4 +716,37 @@ class ChatManager {
 	public function deleteExpiredMessages(): void {
 		$this->commentsManager->deleteCommentsExpiredAtObject('chat', '');
 	}
+
+	/**
+	 * If the attendee only can see the history after join date,
+	 * will remove all comments before join date.
+	 *
+	 * @param Room $room The room of comments
+	 * @param array IComment[] $comments
+	 * @param Attendee $attendee
+	 * @return array
+	 */
+	public function filterHistorySince(Room $room, array $comments, Attendee $attendee): array {
+		// Filter nothing if the room setting is to show history to all
+		if ($room->getShowHistory() === 1) {
+			return $comments;
+		}
+		// Filter nothing if the user haven't the history since.
+		// This will occur for all user added before the manager limit the history to new participants
+		$historySince = $attendee->getHistorySince();
+		if (!$historySince) {
+			return $comments;
+		}
+		foreach ($comments as $key => $comment) {
+			// Ignore if the comment isn't of current room
+			if ($comment->getObjectId() != $room->getId()) {
+				continue;
+			}
+			if ($comment->getCreationDateTime() <= $historySince) {
+				unset($comments[$key]);
+				continue;
+			}
+		}
+		return $comments;
+	}
 }
