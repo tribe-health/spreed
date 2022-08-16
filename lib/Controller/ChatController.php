@@ -758,6 +758,9 @@ class ChatController extends AEnvironmentAwareController {
 		}
 		$comments = $this->chatManager->getMessagesById($this->room, array_merge(...array_values($messageIdsByType)));
 
+		$attendee = $this->participant->getAttendee();
+		$comments = $this->chatManager->filterHistorySince($this->room, $comments, $attendee);
+
 		foreach ($comments as $comment) {
 			$message = $this->messageParser->createMessage($this->room, $this->participant, $comment, $this->l);
 			$this->messageParser->parseMessage($message);
@@ -812,6 +815,9 @@ class ChatController extends AEnvironmentAwareController {
 
 	protected function getMessagesForRoom(Room $room, array $messageIds): array {
 		$comments = $this->chatManager->getMessagesById($room, $messageIds);
+
+		$attendee = $this->participant->getAttendee();
+		$comments = $this->chatManager->filterHistorySince($room, $comments, $attendee);
 
 		$messages = [];
 		foreach ($comments as $comment) {
