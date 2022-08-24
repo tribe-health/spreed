@@ -39,6 +39,9 @@
 				</NcButton>
 			</div>
 		</template>
+		<NcRelatedResourcesPanel provider-id="talk"
+			:item-id="conversation.id"
+			@has-resources="value => hasRelatedResources = value" />
 		<template v-if="projectsEnabled">
 			<NcAppNavigationCaption :title="t('spreed', 'Projects')" />
 			<CollectionList v-if="getUserId && token"
@@ -47,7 +50,7 @@
 				:name="conversation.displayName"
 				:is-active="active" />
 		</template>
-		<NcEmptyContent v-else-if="!hasSharedItems">
+		<NcEmptyContent v-else-if="!hasRelatedResources && !hasSharedItems">
 			<template #icon>
 				<FolderMultipleImage :size="20" />
 			</template>
@@ -68,6 +71,7 @@ import { loadState } from '@nextcloud/initial-state'
 import SharedItems from './SharedItems.vue'
 import { SHARED_ITEM } from '../../../constants.js'
 import NcAppNavigationCaption from '@nextcloud/vue/dist/Components/NcAppNavigationCaption.js'
+import NcRelatedResourcesPanel from '@nextcloud/vue/dist/Components/NcRelatedResourcesPanel.js'
 import NcEmptyContent from '@nextcloud/vue/dist/Components/NcEmptyContent.js'
 import SharedItemsBrowser from './SharedItemsBrowser/SharedItemsBrowser.vue'
 import DotsHorizontal from 'vue-material-design-icons/DotsHorizontal.vue'
@@ -83,6 +87,7 @@ export default {
 		SharedItems,
 		CollectionList,
 		NcAppNavigationCaption,
+		NcRelatedResourcesPanel,
 		NcButton,
 		NcEmptyContent,
 		SharedItemsBrowser,
@@ -105,6 +110,7 @@ export default {
 			showSharedItemsBrowser: false,
 			browserActiveTab: '',
 			projectsEnabled: loadState('core', 'projects_enabled', false),
+			hasRelatedResources: false,
 		}
 	},
 
