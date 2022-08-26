@@ -22,34 +22,25 @@
 <template>
 	<form class="app-navigation-search"
 		@submit.prevent="handleSubmit">
-		<input ref="searchConversations"
-			v-model="localValue"
+		<NcTextField ref="searchConversations"
+			:value.sync="localValue"
 			class="app-navigation-search__input"
-			type="text"
-			:placeHolder="placeholderText"
-			@keypress.enter.prevent="handleSubmit">
-		<NcButton v-if="isSearching"
-			class="abort-search"
-			type="tertiary-no-background"
-			:aria-label="cancelSearchLabel"
-			@click="abortSearch">
-			<template #icon>
-				<Close :size="20" />
-			</template>
-		</NcButton>
+			:label="placeholderText"
+			:placeholder="placeholderText"
+			:show-trailing-button="localValue !== ''"
+			@keypress.enter.prevent="handleSubmit"
+			@trailing-button-click="abortSearch" />
 	</form>
 </template>
 
 <script>
-import NcButton from '@nextcloud/vue/dist/Components/NcButton.js'
-import Close from 'vue-material-design-icons/Close.vue'
+import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import { EventBus } from '../../../services/EventBus.js'
 
 export default {
 	name: 'SearchBox',
 	components: {
-		NcButton,
-		Close,
+		NcTextField,
 	},
 	props: {
 		/**
@@ -144,16 +135,6 @@ export default {
 	z-index: 1;
 	display: flex;
 	justify-content: center;
-	&__input {
-		align-self: center;
-		width: 100%;
-		margin: 4px;
-		padding-left: 8px;
-	}
-}
-
-.abort-search {
-	margin-left: -44px;
 }
 
 </style>

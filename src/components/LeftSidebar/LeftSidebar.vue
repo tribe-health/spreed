@@ -512,6 +512,11 @@ export default {
 	padding: 0 4px 0 6px;
 }
 
+.conversations-search {
+	width: calc(100% - 48px);
+	margin: auto 0;
+}
+
 .new-conversation {
 	display: flex;
 	padding: 8px 8px 8px 4px;

@@ -44,7 +44,7 @@
 				{{ conversationInformation }}
 			</template>
 		</template>
-		<template v-if="!isSearchResult" slot="actions">
+		<template v-if="!isSearchResult" #actions>
 			<NcActionButton v-if="canFavorite"
 				@click.prevent.exact="toggleFavoriteConversation">
 				<Star v-if="item.isFavorite"
