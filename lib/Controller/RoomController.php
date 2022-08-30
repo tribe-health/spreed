@@ -1754,7 +1754,11 @@ class RoomController extends AEnvironmentAwareController {
 	 * @RequireModeratorParticipant
 	 */
 	public function setShowHistory(int $showHistory): DataResponse {
-		$this->roomService->setShowHistory($this->room, $showHistory);
+		try {
+			$this->roomService->setShowHistory($this->room, $showHistory);
+		} catch (InvalidArgumentException $e) {
+			return new DataResponse([], Http::STATUS_BAD_REQUEST);
+		}
 		return new DataResponse();
 	}
 }

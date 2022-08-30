@@ -369,13 +369,14 @@
 * Endpoint: `/room/{token}/show-history`
 * Data:
 
-| field        | type | Description                                       |
-|--------------|------|---------------------------------------------------|
-| `showHistory` | bool | Hide/unhide message history for new participants |
+| field         | type | Description                                                            |
+|---------------|------|------------------------------------------------------------------------|
+| `showHistory` | int  | Limit message history for new participants, 0 = limit, 1 = don't limit |
 
 * Response:
     - Status code:
         + `200 OK`
+        + `400 Bad Request` When the provided showHistory parameter is invalid.
         + `403 Forbidden` When the current user is not a moderator, owner or guest moderator
         + `404 Not Found` When the conversation could not be found for the participant
 
