@@ -412,7 +412,7 @@ class RoomController extends AEnvironmentAwareController {
 			'listable' => Room::LISTABLE_NONE,
 			'callFlag' => Participant::FLAG_DISCONNECTED,
 			'messageExpiration' => 0,
-			'showHistory' => false,
+			'showHistory' => ChatManager::HISTORY_HIDE_BEFORE_JOIN,
 		];
 
 		$lastActivity = $room->getLastActivity();
