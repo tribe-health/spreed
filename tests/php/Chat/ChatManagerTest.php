@@ -444,6 +444,7 @@ class ChatManagerTest extends TestCase {
 			'access_token' => '',
 			'remote_id' => '',
 			'history_since' => null,
+			'join_comment_id' => 0,
 		]);
 		$chat = $this->createMock(Room::class);
 		$chat->expects($this->any())
@@ -501,6 +502,7 @@ class ChatManagerTest extends TestCase {
 			'access_token' => '',
 			'remote_id' => '',
 			'history_since' => null,
+			'join_comment_id' => 0,
 		]);
 		$chat = $this->createMock(Room::class);
 		$chat->expects($this->any())
@@ -580,6 +582,7 @@ class ChatManagerTest extends TestCase {
 			'access_token' => '',
 			'remote_id' => '',
 			'history_since' => null,
+			'join_comment_id' => 0,
 		]);
 		$chat = $this->createMock(Room::class);
 		$chat->expects($this->any())
