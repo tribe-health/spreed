@@ -90,7 +90,6 @@
 
 		<!-- Participant's actions menu -->
 		<NcActions v-if="canBeModerated && !isSearched"
-			:container="container"
 			:aria-label="participantSettingsAriaLabel"
 			:force-menu="true"
 			class="participant-row__actions">

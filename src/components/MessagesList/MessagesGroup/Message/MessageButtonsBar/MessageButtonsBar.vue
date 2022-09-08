@@ -42,8 +42,6 @@
 				</NcActionButton>
 			</NcActions>
 			<NcActions :force-menu="true"
-				:container="`#message_${id}`"
-				:boundaries-element="containerElement"
 				@open="onMenuOpen"
 				@close="onMenuClose">
 				<NcActionButton v-if="isPrivateReplyable"
@@ -320,10 +318,6 @@ export default {
 	computed: {
 		conversation() {
 			return this.$store.getters.conversation(this.token)
-		},
-
-		containerElement() {
-			return document.querySelector(this.container)
 		},
 
 		isDeleteable() {
